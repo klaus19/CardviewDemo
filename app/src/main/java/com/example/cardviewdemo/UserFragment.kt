@@ -29,6 +29,7 @@ class UserFragment : Fragment() {
     private var currentPairIndex =0
     private lateinit var currentPair:Map.Entry<String,String>
     lateinit var counterviewModel:Countviewmodel
+    lateinit var flashCardViewModel: FlashCardViewModel
     var isFront=true
     private val totalPairs = 17 // change the value to the actual number of entries in your hashMap
 
@@ -41,6 +42,7 @@ class UserFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentUserBinding.inflate(inflater,container,false)
         counterviewModel = ViewModelProvider(this).get(Countviewmodel::class.java)
+        flashCardViewModel = ViewModelProvider(this).get(FlashCardViewModel::class.java)
 
         binding.textCounter.text = counterviewModel.count.toString()
 
@@ -145,22 +147,14 @@ class UserFragment : Fragment() {
             // update the UI with the new pair
             binding.textCardFront.text = currentPair.key
             binding.textCardBack.text = hashMap[currentPair.key]
-
-
-
                     //val flashCardPair = FlashCardPair(front,back!!)//flashCardViewModel.insertFlashcards(flashCardPair)
-                    val replyIntent = Intent()
-                    if (TextUtils.isEmpty(binding.textCardFront.text)||TextUtils.isEmpty(binding.textCardBack.text)){
-                        requireActivity().setResult(Activity.RESULT_CANCELED,replyIntent)
-                    }else{
-                        val front = binding.textCardFront.text.toString()
-                        val back = binding.textCardBack.text.toString()
 
-                        replyIntent.putExtra(EXTRA_REPLY,front)
-                        replyIntent.putExtra(EXTRA_REPLY1,back)
-                        requireActivity().setResult(Activity.RESULT_OK,replyIntent)
+                        val front  = binding.textCardFront.text.toString()
+                        val back = binding.textCardBack.text.toString()
+                         val newWord = FlashCardPair(front,back)
+                         flashCardViewModel.insertFlashcards(newWord)
                     }
-                }
+
         binding.cardLearning.setOnClickListener {
 
                  findNavController().navigate(R.id.action_userFragment_to_flashCardFragment)

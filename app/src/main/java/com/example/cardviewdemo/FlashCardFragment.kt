@@ -16,6 +16,7 @@ import com.example.cardviewdemo.databinding.FragmentUserBinding
 import com.example.cardviewdemo.db.FlashCardPair
 import com.example.cardviewdemo.db.FlashCardViewModel
 import com.example.cardviewdemo.db.FlashcardViewModelFactory
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 
 class FlashCardFragment : Fragment() {
@@ -27,25 +28,6 @@ class FlashCardFragment : Fragment() {
         FlashcardViewModelFactory((requireActivity().application as FlashcardApplication).repository)
     }
 
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == newWordActivityRequestCode && resultCode == Activity.RESULT_OK) {
-            val front =data?.getStringExtra(UserFragment.EXTRA_REPLY)
-            val back = data?.getStringExtra(UserFragment.EXTRA_REPLY1)
-                    if (!front.isNullOrEmpty() && !back.isNullOrEmpty()) {
-                        val newWord = FlashCardPair(front, back)
-                        flashcardViewModel.insertFlashcards(newWord)
-                    }
-        } else {
-            Toast.makeText(
-                requireContext(),
-                R.string.empty_not_saved,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,14 +37,39 @@ class FlashCardFragment : Fragment() {
         binding = FragmentFlashCardBinding.inflate(inflater, container, false)
 
          val adapter = FlashcardListAdapter()
-        binding.recyclerviewFlashcard.adapter = adapter
-        binding.recyclerviewFlashcard.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerview1.adapter = adapter
+        binding.recyclerview1.layoutManager = LinearLayoutManager(requireContext())
+
 
         flashcardViewModel.allFlashcards.observe(requireActivity()){flashcard ->
             flashcard.let {
                 adapter.submitList(it)
             }
         }
+
+        binding.fab1.setOnClickListener {
+            val intent = Intent(requireActivity(), UserFragment::class.java)
+            startActivityForResult(intent, newWordActivityRequestCode)
+        }
         return binding.root
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == newWordActivityRequestCode && resultCode == Activity.RESULT_OK) {
+            val front =data?.getStringExtra(UserFragment.EXTRA_REPLY)
+            val back = data?.getStringExtra(UserFragment.EXTRA_REPLY1)
+            if (!front.isNullOrEmpty() && !back.isNullOrEmpty()) {
+                val newWord = FlashCardPair(front, back)
+                flashcardViewModel.insertFlashcards(newWord)
+            }
+        } else {
+            Toast.makeText(
+                requireContext(),
+                R.string.empty_not_saved,
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }
