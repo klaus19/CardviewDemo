@@ -54,22 +54,4 @@ class FlashCardFragment : Fragment() {
         return binding.root
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        if (requestCode == newWordActivityRequestCode && resultCode == Activity.RESULT_OK) {
-            val front =data?.getStringExtra(UserFragment.EXTRA_REPLY)
-            val back = data?.getStringExtra(UserFragment.EXTRA_REPLY1)
-            if (!front.isNullOrEmpty() && !back.isNullOrEmpty()) {
-                val newWord = FlashCardPair(front, back)
-                flashcardViewModel.insertFlashcards(newWord)
-            }
-        } else {
-            Toast.makeText(
-                requireContext(),
-                R.string.empty_not_saved,
-                Toast.LENGTH_LONG
-            ).show()
-        }
-    }
 }

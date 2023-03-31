@@ -8,12 +8,14 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.setFragmentResult
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.cardviewdemo.databinding.FragmentUserBinding
@@ -29,10 +31,12 @@ class UserFragment : Fragment() {
     private var currentPairIndex =0
     private lateinit var currentPair:Map.Entry<String,String>
     lateinit var counterviewModel:Countviewmodel
-    lateinit var flashCardViewModel: FlashCardViewModel
     var isFront=true
     private val totalPairs = 17 // change the value to the actual number of entries in your hashMap
 
+    private val flashcardViewModel: FlashCardViewModel by viewModels {
+        FlashcardViewModelFactory((requireActivity().application as FlashcardApplication).repository)
+    }
 
     @SuppressLint("ResourceType")
     override fun onCreateView(
@@ -42,7 +46,7 @@ class UserFragment : Fragment() {
         // Inflate the layout for this fragment
         binding = FragmentUserBinding.inflate(inflater,container,false)
         counterviewModel = ViewModelProvider(this).get(Countviewmodel::class.java)
-        flashCardViewModel = ViewModelProvider(this).get(FlashCardViewModel::class.java)
+
 
         binding.textCounter.text = counterviewModel.count.toString()
 
@@ -52,6 +56,7 @@ class UserFragment : Fragment() {
         binding.floatingActionButton.setOnClickListener {
             findNavController().navigate(R.id.action_userFragment_to_flashCardFragment)
         }
+
 
         //changing color of progress bar progress
         binding.progressHorizontal.progressTintList = ColorStateList.valueOf(
@@ -148,12 +153,17 @@ class UserFragment : Fragment() {
             binding.textCardFront.text = currentPair.key
             binding.textCardBack.text = hashMap[currentPair.key]
                     //val flashCardPair = FlashCardPair(front,back!!)//flashCardViewModel.insertFlashcards(flashCardPair)
+            flashcardViewModel.allFlashcards.observe(requireActivity()){ data->
+                data.let {
+                    val front  = binding.textCardFront.text.toString()
+                    val back = binding.textCardBack.text.toString()
+                    val newWord = FlashCardPair(front,back)
+                    flashcardViewModel.insertFlashcards(newWord)
+                    Log.d("data","$newWord")
+                }
 
-                        val front  = binding.textCardFront.text.toString()
-                        val back = binding.textCardBack.text.toString()
-                         val newWord = FlashCardPair(front,back)
-                         flashCardViewModel.insertFlashcards(newWord)
-                    }
+            }
+        }
 
         binding.cardLearning.setOnClickListener {
 
